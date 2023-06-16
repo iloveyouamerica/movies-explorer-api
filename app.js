@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors'); // Импорт cors должен быть здесь
+const helmet = require('helmet');
 const { errors } = require('celebrate'); // спец. миддлвэр celebrate для обработки ошибок
 const { loginJoi, createUserJoi } = require('./middlewares/celebrate');
 const rootRouter = require('./routes'); // корневой роутер
@@ -8,17 +10,17 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const centralCatchErrors = require('./middlewares/centralCatchErrors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const cors = require('cors');
+const { PORT, DB_ADDRESS } = require('./utils/config');
 const { limiter } = require('./middlewares/rateLimiter');
 
-const { PORT = 3000 } = process.env;
 const app = express(); // создаём приложение
+
 app.use(cors()); // добавляем заголовки к каждому ответу, доступ для любого домена: true
 
-app.disable('x-powered-by'); // скрыть информацию о сервере (по книге Eaton R Brown)
+app.use(helmet());
 
 // подключаемся к базе данных
-mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb')
+mongoose.connect(DB_ADDRESS)
   .then(() => console.log('Подключение к базе данных выполнено успешно!'))
   .catch((err) => console.log(`Ошибка подключения к базе данных: ${err}`));
 
