@@ -31,6 +31,9 @@ const updateUser = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new RequestError('Переданы некорректные данные'));
       }
+      if (err.code === 11000) {
+        return next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
+      }
       return next(err);
     });
 };
